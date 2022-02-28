@@ -1,9 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
 log=installer.log
-
-[ ! -f $log ] \
-&&  touch installer.log
 
 sh write-log.sh "Read command line arguments ..." | tee -a $log
 
@@ -19,9 +16,10 @@ do
   #  echo "Key: $key | Value: $value"
 done
 
-[ -z "$node_name" ] \
-&& sh write-log.sh "node_name is required. | Argument Name: NodeName" | tee -a $log \
-&& exit 0
+if [ -z "$node_name" ]; then
+sh write-log.sh "node_name is required. | Argument Name: NodeName" | tee -a $log
+exit 0
+fi
 
 sh write-log.sh "All arguments are set" | tee -a $log
 sh write-log.sh "Name of the node: $node_name" | tee -a $log
@@ -32,6 +30,7 @@ sh write-log.sh "Validating if docker is installed and running ..." | tee -a $lo
 if result=$(systemctl is-active docker 2>&1); then
   sh write-log.sh "Docker is running." | tee -a $log
 else
+  sh write-log.sh "Returned by the command: $result" | tee -a $log
   sh write-log.sh "Docker is not running, is docker installed?" | tee -a $log
   exit 0
 fi
@@ -43,13 +42,14 @@ sh write-log.sh "Detecting the architecture ..." | tee -a $log
 arch=$(uname -m)
 sh write-log.sh "Architecture is $arch" | tee -a $log
 
-if [ $arch="x86_64" ] || [ $arch="aarch64" ]; then
+if [ "$arch" = x86_64 -o "$arch" = aarch64 ]; then
   if result=$(cd ./weeve-agent \
   && curl -sO https://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@raw.githubusercontent.com/nithinsaii/to_transfer/master/binaries/weeve-agent-$arch 2>&1); then
     sh write-log.sh "Executable downloaded." | tee -a $log
     chmod u+x ./weeve-agent/weeve-agent-$arch
     sh write-log.sh "Changes file permission" | tee -a $log
   else
+    sh write-log.sh "Returned by the command: $result" | tee -a $log
     sh write-log.sh "Error while downloading the executable !" | tee -a $log
     sudo rm -r weeve-agent
     exit 0
@@ -68,8 +68,9 @@ if result=$(cd ./weeve-agent \
 && curl -sO https://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@raw.githubusercontent.com/nithinsaii/to_transfer/master/weeve-agent/$dependency 2>&1); then
   sh write-log.sh "$dependency downloaded." | tee -a $log
 else
+  sh write-log.sh "Returned by the command: $result" | tee -a $log
   sh write-log.sh "Error while downloading the dependencies !" | tee -a $log
-  sudo rm -r weeve-agent
+  rm -r weeve-agent
   exit 0
 fi
 done
@@ -104,6 +105,7 @@ if result=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
   #   sh write-log.sh "weeve-agent is connected." | tee -a $log
   # fi
 else
+  sh write-log.sh "Returned by the command: $result" | tee -a $log
   sh write-log.sh "Error while starting the weeve-agent service!" | tee -a $log
   sudo systemctl stop weeve-agent
   sudo systemctl daemon-reload
