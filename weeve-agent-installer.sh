@@ -29,17 +29,12 @@ process_complete=false
 
 log Read command line arguments ...
 
-for argument in "$@"
-do
-  key=$(echo $argument | cut --fields 1 --delimiter='=')
-  value=$(echo $argument | cut --fields 2 --delimiter='=')
+key=$(echo "$@" | cut --fields 1 --delimiter='=')
+value=$(echo "$@" | cut --fields 2 --delimiter='=')
 
-  case "$key" in
-    "NodeName")  node_name="$value" ;;
-    *)
-  esac
-  #  echo "Key: $key | Value: $value"
-done
+if [ "$key" = NodeName ] ; then
+  node_name="$value"
+fi
 
 if [ -z "$node_name" ]; then
 log node_name is required. | Argument Name: NodeName
