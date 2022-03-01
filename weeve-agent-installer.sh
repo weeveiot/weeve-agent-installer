@@ -157,6 +157,6 @@ if result=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topi
   log Returned by the command: $result
 else
   log weeve-agent is connected.
-  log start deploying edge-application through weeve-manager.
+  log start deploying edge-applications through weeve-manager.
   process_complete=true
 fi
