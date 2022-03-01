@@ -12,11 +12,12 @@ trap cleanup EXIT
 
 cleanup() {
   if [ "$process_complete" = false ]; then
-    $(sudo systemctl stop weeve-agent
-      sudo systemctl daemon-reload
-      sudo rm /lib/systemd/system/weeve-agent.service
-      sudo rm /lib/systemd/system/weeve-agent.argconf
-      sudo rm -r ./weeve-agent)
+    log cleaning up the contents ...
+    sudo systemctl stop weeve-agent
+    sudo systemctl daemon-reload
+    sudo rm /lib/systemd/system/weeve-agent.service
+    sudo rm /lib/systemd/system/weeve-agent.argconf
+    rm -r ./weeve-agent
   fi
 }
 
@@ -44,6 +45,14 @@ fi
 log All arguments are set
 log Name of the node: $node_name
 
+secret_file=.weeve-agent-secrets
+if [ -f "$secret_file" ];then
+log Reading the access key ...
+access_key=$(cat .weeve-agent-secrets)
+else
+log Please create and file named '.weeve-agent-secrets' and append the access key of the github into the file!!!
+exit 0
+fi
 
 log Validating if docker is installed and running ...
 
@@ -64,7 +73,7 @@ log Architecture is $arch
 
 if [ "$arch" = x86_64 -o "$arch" = aarch64 ]; then
   if result=$(cd ./weeve-agent \
-  && curl -sO https://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@raw.githubusercontent.com/nithinsaii/to_transfer/master/binaries/weeve-agent-$arch 2>&1); then
+  && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/weeve-agent-$arch 2>&1); then
     log Executable downloaded.
     chmod u+x ./weeve-agent/weeve-agent-$arch
     log Changes file permission
@@ -83,7 +92,7 @@ log Downloading the dependencies ...
 for dependency in AmazonRootCA1.pem 4be43aa6f1-certificate.pem.crt 4be43aa6f1-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if result=$(cd ./weeve-agent \
-&& curl -sO https://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@raw.githubusercontent.com/nithinsaii/to_transfer/master/weeve-agent/$dependency 2>&1); then
+&& curl -sO https://$access_key@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$dependency 2>&1); then
   log $dependency downloaded.
 else
   log Error while downloading the dependencies !
