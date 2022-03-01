@@ -8,18 +8,18 @@ log() {
         echo '[' `date +"%Y-%m-%d %T"` ']:' INFO "$@" | tee -a $logfile
 }
 
-trap cleanup EXIT
+# trap cleanup EXIT
 
-cleanup() {
-  if [ "$process_complete" = false ]; then
-    log cleaning up the contents ...
-    sudo systemctl stop weeve-agent
-    sudo systemctl daemon-reload
-    sudo rm /lib/systemd/system/weeve-agent.service
-    sudo rm /lib/systemd/system/weeve-agent.argconf
-    rm -r ./weeve-agent
-  fi
-}
+# cleanup() {
+#   if [ "$process_complete" = false ]; then
+#     log cleaning up the contents ...
+#     sudo systemctl stop weeve-agent
+#     sudo systemctl daemon-reload
+#     sudo rm /lib/systemd/system/weeve-agent.service
+#     sudo rm /lib/systemd/system/weeve-agent.argconf
+#     rm -r ./weeve-agent
+#   fi
+# }
 
 process_complete=false
 
@@ -128,6 +128,7 @@ if result=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
   log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
+  log For good measure please check the access key in .weeve-agent-secrets and also if the access key has expired in github
   log Returned by the command: $result
   exit 0
 fi
