@@ -1,25 +1,29 @@
 #!/bin/sh
 
+# failure to pipe will cause exit
 set -o pipefail
 
 logfile=installer.log
 
+# logger
 log() {
         echo '[' `date +"%Y-%m-%d %T"` ']:' INFO "$@" | tee -a $logfile
 }
 
-# trap cleanup EXIT
+# function to clean-up the contents on failure at any point
+# note that this function will be called even at successful ending of the script hence the condition check on variable
+trap cleanup EXIT
 
-# cleanup() {
-#   if [ "$process_complete" = false ]; then
-#     log cleaning up the contents ...
-#     sudo systemctl stop weeve-agent
-#     sudo systemctl daemon-reload
-#     sudo rm /lib/systemd/system/weeve-agent.service
-#     sudo rm /lib/systemd/system/weeve-agent.argconf
-#     rm -r ./weeve-agent
-#   fi
-# }
+cleanup() {
+  if [ "$process_complete" = false ]; then
+    log cleaning up the contents ...
+    sudo systemctl stop weeve-agent
+    sudo systemctl daemon-reload
+    sudo rm /lib/systemd/system/weeve-agent.service
+    sudo rm /lib/systemd/system/weeve-agent.argconf
+    rm -r ./weeve-agent
+  fi
+}
 
 process_complete=false
 
@@ -45,17 +49,20 @@ fi
 log All arguments are set
 log Name of the node: $node_name
 
-secret_file=.weeve-agent-secrets
+secret_file=.weeve-agent-secret
+
+# checking for the file containing access key
 if [ -f "$secret_file" ];then
 log Reading the access key ...
-access_key=$(cat .weeve-agent-secrets)
+access_key=$(cat "$secret_file")
 else
-log Please create and file named '.weeve-agent-secrets' and append the access key of the github into the file!!!
+log Please create and file named '.weeve-agent-secret' and append the access key of the github into the file!!!
 exit 0
 fi
 
 log Validating if docker is installed and running ...
 
+# checking if docker is running
 if result=$(systemctl is-active docker 2>&1); then
   log Docker is running.
 else
@@ -71,6 +78,7 @@ log Detecting the architecture ...
 arch=$(uname -m)
 log Architecture is $arch
 
+# detecting the architecture and downloading the respective weeve-agent binary
 if [ "$arch" = x86_64 -o "$arch" = aarch64 ]; then
   if result=$(cd ./weeve-agent \
   && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/weeve-agent-$arch 2>&1); then
@@ -89,6 +97,7 @@ fi
 
 log Downloading the dependencies ...
 
+# downloading the dependencies with personal access key since its stored in private repository
 for dependency in AmazonRootCA1.pem 4be43aa6f1-certificate.pem.crt 4be43aa6f1-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if result=$(cd ./weeve-agent \
@@ -103,9 +112,14 @@ fi
 done
 log Dependencies downloaded.
 
+# appending the argument for node name to weeve-agent.argconf
 log Adding the node name argument ...
 echo "ARG_NODENAME=--name $node_name" >> ./weeve-agent/weeve-agent.argconf
 
+# appending the required strings to the .service to point systemd to the path of the binary
+# following are the lines appended to weeve-agent.service
+# WorkingDirectory=/home/nithin/weeve-agent/weeve-agent
+# ExecStart=/home/nithin/weeve-agent/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
 binary_name="weeve-agent-$arch"
 current_directory=$(pwd)
 
@@ -121,6 +135,7 @@ echo "$exec_start" >> ./weeve-agent/weeve-agent.service
 
 log Starting the service ...
 
+# moving .service and .argconf to systemd path and starting the service
 if result=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
 && sudo mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
 && sudo systemctl enable weeve-agent \
@@ -128,12 +143,15 @@ if result=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
   log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
-  log For good measure please check the access key in .weeve-agent-secrets and also if the access key has expired in github
+  log For good measure please check the access key in .weeve-agent-secret and also if the access key has expired in github
   log Returned by the command: $result
   exit 0
 fi
 
 sleep 5
+
+# parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
+# on successful completion of the script $process_complete is set to true to skip the clean-up on exit
 if result=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log failed to start weeve-agent
   log Returned by the command: $result

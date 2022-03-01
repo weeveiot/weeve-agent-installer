@@ -4,12 +4,12 @@ Bash script to download and run the weeve-agent.
 
 # NOTE
 
-Currently the binaries and the dependencies are stored in one of my private repositories.
-Personal Access Token is used to curl the contents from the repository.
+Personal access key is required to download the contents for the agents.
+Please make sure the access key is stored in a file named ".weeve-agent-secret" in the same directory where the script is launched.
 
 # RUN
 
 ```bash
-bash weeve-agent-installer.sh NodeName=<name of the node>
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | bash -s NodeName=<name of the node>
 
 ```
