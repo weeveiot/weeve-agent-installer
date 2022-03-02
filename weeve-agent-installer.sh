@@ -1,13 +1,10 @@
 #!/bin/sh
 
-# failure to pipe will cause exit
-set -o pipefail
-
 logfile=installer.log
 
 # logger
 log() {
-        echo '[' `date +"%Y-%m-%d %T"` ']:' INFO "$@" | tee -a $logfile
+  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a $logfile
 }
 
 # function to clean-up the contents on failure at any point
@@ -42,7 +39,7 @@ exit 0
 fi
 
 log All arguments are set
-log Name of the node: $node_name
+log Name of the node: "$node_name"
 
 secret_file=.weeve-agent-secret
 
@@ -62,7 +59,7 @@ if result=$(systemctl is-active docker 2>&1); then
   log Docker is running.
 else
   log Docker is not running, is docker installed?
-  log Returned by the command: $result
+  log Returned by the command: "$result"
   exit 0
 fi
 
@@ -71,22 +68,22 @@ mkdir weeve-agent
 
 log Detecting the architecture ...
 arch=$(uname -m)
-log Architecture is $arch
+log Architecture is "$arch"
 
 # detecting the architecture and downloading the respective weeve-agent binary
-if [ "$arch" = x86_64 -o "$arch" = aarch64 ]; then
+if [ "$arch" = x86_64 ] || [ "$arch" = aarch64 ]; then
   if result=$(cd ./weeve-agent \
-  && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/weeve-agent-$arch 2>&1); then
+  && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/weeve-agent-"$arch" 2>&1); then
     log Executable downloaded.
-    chmod u+x ./weeve-agent/weeve-agent-$arch
+    chmod u+x ./weeve-agent/weeve-agent-"$arch"
     log Changes file permission
   else
     log Error while downloading the executable !
-    log Returned by the command: $result
+    log Returned by the command: "$result"
     exit 0
   fi
 else
-  log Architecture $arch is not supported !
+  log Architecture "$arch" is not supported !
   exit 0
 fi
 
@@ -96,11 +93,11 @@ log Downloading the dependencies ...
 for dependency in AmazonRootCA1.pem 4be43aa6f1-certificate.pem.crt 4be43aa6f1-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if result=$(cd ./weeve-agent \
-&& curl -sO https://$access_key@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$dependency 2>&1); then
+&& curl -sO https://"$access_key"@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$dependency 2>&1); then
   log $dependency downloaded.
 else
   log Error while downloading the dependencies !
-  log Returned by the command: $result
+  log Returned by the command: "$result"
   rm -r weeve-agent
   exit 0
 fi
@@ -139,7 +136,7 @@ if result=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
 else
   log Error while starting the weeve-agent service!
   log For good measure please check the access key in .weeve-agent-secret and also if the access key has expired in github
-  log Returned by the command: $result
+  log Returned by the command: "$result"
   exit 0
 fi
 
@@ -149,7 +146,7 @@ sleep 5
 # on successful completion of the script $process_complete is set to true to skip the clean-up on exit
 if result=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log failed to start weeve-agent
-  log Returned by the command: $result
+  log Returned by the command: "$result"
 else
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
