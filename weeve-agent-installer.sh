@@ -145,10 +145,10 @@ sleep 5
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
 # on successful completion of the script $process_complete is set to true to skip the clean-up on exit
 if result=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
-  log failed to start weeve-agent
-  log Returned by the command: "$result"
-else
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
   process_complete=true
+else
+  log failed to start weeve-agent
+  log Returned by the command: "$result"
 fi
