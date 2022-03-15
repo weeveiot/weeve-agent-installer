@@ -71,19 +71,28 @@ arch=$(uname -m)
 log Architecture is "$arch"
 
 # detecting the architecture and downloading the respective weeve-agent binary
-if [ "$arch" = x86_64 ] || [ "$arch" = aarch64 ]; then
-  if result=$(cd ./weeve-agent \
-  && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/weeve-agent-"$arch" 2>&1); then
-    log Executable downloaded.
-    chmod u+x ./weeve-agent/weeve-agent-"$arch"
-    log Changes file permission
-  else
-    log Error while downloading the executable !
-    log Returned by the command: "$result"
-    exit 0
-  fi
+case "$arch" in
+  "i386" | "i686") binary_name=weeve-agent-386
+  ;;
+  "x86_64") binary_name=weeve-agent-amd64
+  ;;
+  "arm" | "armv7l") binary_name=weeve-agent-arm
+  ;;
+  "aarch64" | "aarch64_be" | "armv8b" | "armv8l") binary_name=weeve-agent-arm64
+  ;;
+  *) log Architecture "$arch" is not supported !
+     exit 0
+  ;;
+esac
+
+if result=$(cd ./weeve-agent \
+&& curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/"$binary_name" 2>&1); then
+  log Executable downloaded.
+  chmod u+x ./weeve-agent/"$binary_name"
+  log Changes file permission
 else
-  log Architecture "$arch" is not supported !
+  log Error while downloading the executable !
+  log Returned by the command: "$result"
   exit 0
 fi
 
@@ -112,7 +121,6 @@ echo "ARG_NODENAME=--name $node_name" >> ./weeve-agent/weeve-agent.argconf
 # following are the lines appended to weeve-agent.service
 # WorkingDirectory=/home/nithin/weeve-agent/weeve-agent
 # ExecStart=/home/nithin/weeve-agent/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
-binary_name="weeve-agent-$arch"
 current_directory=$(pwd)
 
 working_directory="WorkingDirectory=$current_directory/weeve-agent"
@@ -145,10 +153,10 @@ sleep 5
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
 # on successful completion of the script $process_complete is set to true to skip the clean-up on exit
 if result=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
-  log failed to start weeve-agent
-  log Returned by the command: "$result"
-else
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
   process_complete=true
+else
+  log failed to start weeve-agent
+  log Returned by the command: "$result"
 fi

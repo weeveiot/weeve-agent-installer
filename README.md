@@ -10,6 +10,6 @@ Please make sure the access key is stored in a file named ".weeve-agent-secret" 
 # RUN
 
 ```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | bash -s NodeName=<name of the node>
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
 
 ```
