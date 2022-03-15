@@ -71,7 +71,6 @@ arch=$(uname -m)
 log Architecture is "$arch"
 
 # detecting the architecture and downloading the respective weeve-agent binary
-
 case "$arch" in
   "i386" | "i686") binary_name=weeve-agent-386
   ;;
@@ -79,7 +78,7 @@ case "$arch" in
   ;;
   "arm" | "armv7l") binary_name=weeve-agent-arm
   ;;
-  "aarch64" | "aarch64_be" | "aarch64" | "armv8b" | "armv8l") binary_name=weeve-agent-arm64
+  "aarch64" | "aarch64_be" | "armv8b" | "armv8l") binary_name=weeve-agent-arm64
   ;;
   *) log Architecture "$arch" is not supported !
      exit 0
