@@ -2,6 +2,17 @@
 
 Bash script to download and run the weeve-agent.
 
+# REQUIREMENT TO RUN THE SCRIPT
+
+(For registering with the script) The Github personal access key is required to download the contents for the agents. Please make sure the access key is stored in a file named ".weeve-agent-secret" in the same directory where the script is launched.
+
+# RUN
+
+```bash
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
+
+```
+
 # Developers - manually starting the weeve agent
 
 1. Install docker [docker installation for ubuntu](https://docs.docker.com/engine/install/ubuntu/)
@@ -37,14 +48,3 @@ To delete the IoT thing, call the API mutation deleteNode. This will remove the:
 - things in IoT core
 - node and deployments in DB
 - certs in bucket
-
-# REQUIREMENT TO RUN THE SCRIPT
-
-(For registering with the script) The Github personal access key is required to download the contents for the agents. Please make sure the access key is stored in a file named ".weeve-agent-secret" in the same directory where the script is launched.
-
-# RUN
-
-```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
-
-```
