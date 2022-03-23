@@ -119,8 +119,8 @@ echo "ARG_NODENAME=--name $node_name" >> ./weeve-agent/weeve-agent.argconf
 
 # appending the required strings to the .service to point systemd to the path of the binary
 # following are the lines appended to weeve-agent.service
-# WorkingDirectory=/home/nithin/weeve-agent/weeve-agent
-# ExecStart=/home/nithin/weeve-agent/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
+# WorkingDirectory=/home/nithin/weeve-agent
+# ExecStart=/home/nithin/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
 current_directory=$(pwd)
 
 working_directory="WorkingDirectory=$current_directory/weeve-agent"
