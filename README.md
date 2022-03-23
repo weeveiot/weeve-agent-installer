@@ -9,7 +9,7 @@ Bash script to download and run the weeve-agent.
 # RUN
 
 ```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/<branch>/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/main/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
 
 ```
 
