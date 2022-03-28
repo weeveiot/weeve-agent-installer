@@ -6,10 +6,17 @@ Bash script to download and run the weeve-agent.
 
 (For registering with the script) The Github personal access key is required to download the contents for the agents. Please make sure the access key is stored in a file named ".weeve-agent-secret" in the same directory where the script is launched.
 
-# RUN
+# INSTALLING WEEVE-AGENT
 
 ```bash
 curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
+
+```
+
+# UNINSTALLING WEEVE-AGENT
+
+```bash
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh | sh -s NodeName=<name of the node>
 
 ```
 
