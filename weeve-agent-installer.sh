@@ -102,7 +102,7 @@ log Downloading the dependencies ...
 for dependency in AmazonRootCA1.pem 1d77ae9afd-certificate.pem.crt 1d77ae9afd-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if result=$(cd ./weeve-agent \
-&& curl -sO https://"$access_key"@raw.githubusercontent.com/nithinsaii/weeve-agent-dependencies-demo/master/$dependency 2>&1); then
+&& curl -sO https://"$access_key"@raw.githubusercontent.com/nithinsaii/weeve-agent-dependencies--demo/master/$dependency 2>&1); then
   log $dependency downloaded.
 else
   log Error while downloading the dependencies !
