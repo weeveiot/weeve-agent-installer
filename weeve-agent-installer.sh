@@ -11,6 +11,9 @@ log() {
 # note that this function will be called even at successful ending of the script hence the condition check on variable
 trap cleanup EXIT
 
+# if in case the user have deleted the weeve-agent.service and did not reload the systemd daemon
+sudo systemctl daemon-reload
+
 cleanup() {
   if [ "$process_complete" = false ]; then
     log cleaning up the contents ...
@@ -35,8 +38,8 @@ arguments_file=/lib/systemd/system/weeve-agent.argconf
 if [ -d "$weeve_agent_directory" ] || [ -f "$service_file" ] || [ -f "$arguments_file" ]; then
   log Detected some weeve-agent contents!
   log Proceeding with the un-installation of the existing instance of weeve-agent ...
-  log Continuing with the installation ...
   cleanup
+  log Continuing with the installation ...
 else
   log No weeve-agent contents found, proceeding with the installation ...
 fi
