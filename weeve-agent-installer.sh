@@ -24,6 +24,23 @@ cleanup() {
 
 process_complete=false
 
+log Checking if a instance of weeve-agent is already running ...
+
+current_directory=$(pwd)
+
+weeve_agent_directory="$current_directory"/weeve-agent
+service_file=/lib/systemd/system/weeve-agent.service
+arguments_file=/lib/systemd/system/weeve-agent.argconf
+
+if [ -d "$weeve_agent_directory" ] || [ -f "$service_file" ] || [ -f "$arguments_file" ]; then
+  log Detected some weeve-agent contents!
+  log Proceeding with the un-installation of the existing instance of weeve-agent ...
+  log Continuing with the installation ...
+  cleanup
+else
+  log No weeve-agent contents found, proceeding with the installation ...
+fi
+
 log Read command line arguments ...
 
 key=$(echo "$@" | cut --fields 1 --delimiter='=')
@@ -81,7 +98,7 @@ case "$arch" in
   "aarch64" | "aarch64_be" | "armv8b" | "armv8l") binary_name=weeve-agent-arm64
   ;;
   *) log Architecture "$arch" is not supported !
-     exit 0
+  exit 0
   ;;
 esac
 
@@ -121,7 +138,6 @@ echo "ARG_NODENAME=--name $node_name" >> ./weeve-agent/weeve-agent.argconf
 # following are the lines appended to weeve-agent.service
 # WorkingDirectory=/home/nithin/weeve-agent
 # ExecStart=/home/nithin/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
-current_directory=$(pwd)
 
 working_directory="WorkingDirectory=$current_directory/weeve-agent"
 
