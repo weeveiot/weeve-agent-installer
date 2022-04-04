@@ -27,6 +27,24 @@ cleanup() {
 
 process_complete=false
 
+log Read command line arguments ...
+
+key=$(echo "$@" | cut --fields 1 --delimiter='=')
+value=$(echo "$@" | cut --fields 2 --delimiter='=')
+
+if [ "$key" = NodeName ] ; then
+  node_name="$value"
+fi
+
+if [ -z "$node_name" ]; then
+log node_name is required
+echo -n "Give a node name: "
+read -r node_name
+fi
+
+log All arguments are set
+log Name of the node: "$node_name"
+
 log Checking if a instance of weeve-agent is already running ...
 
 current_directory=$(pwd)
@@ -44,31 +62,20 @@ else
   log No weeve-agent contents found, proceeding with the installation ...
 fi
 
-log Read command line arguments ...
+log Github Personal Access Token is required to continue!
+log Follow the steps :
+log - Create a file named '.weeve-agent-secret'
+log - Paste the Token into the file
 
-key=$(echo "$@" | cut --fields 1 --delimiter='=')
-value=$(echo "$@" | cut --fields 2 --delimiter='=')
-
-if [ "$key" = NodeName ] ; then
-  node_name="$value"
-fi
-
-if [ -z "$node_name" ]; then
-log node_name is required. | Argument Name: NodeName
-exit 0
-fi
-
-log All arguments are set
-log Name of the node: "$node_name"
-
-secret_file=.weeve-agent-secret
+echo -n "Give the absolute path to the file: "
+read -r secret_file
 
 # checking for the file containing access key
 if [ -f "$secret_file" ];then
 log Reading the access key ...
 access_key=$(cat "$secret_file")
 else
-log Please create and file named '.weeve-agent-secret' and append the access key of the github into the file!!!
+log File not found!!!
 exit 0
 fi
 
@@ -80,6 +87,7 @@ if result=$(systemctl is-active docker 2>&1); then
 else
   log Docker is not running, is docker installed?
   log Returned by the command: "$result"
+  log To install docker, visit https://docs.docker.com/engine/install/
   exit 0
 fi
 
