@@ -8,9 +8,16 @@ Bash script to download and run the weeve-agent.
 
 # INSTALLING WEEVE-AGENT
 
-```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh | sh -s NodeName=<name of the node>
+### GET THE INSTALLER
 
+```bash
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh -o weeve-agent-installer.sh
+```
+
+### RUN THE INSTALLER
+
+```bash
+sh weeve-agent-installer.sh
 ```
 
 # UNINSTALLING WEEVE-AGENT
