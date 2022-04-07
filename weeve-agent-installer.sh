@@ -149,8 +149,8 @@ echo "ARG_NODENAME=--name $NODE_NAME" >> ./weeve-agent/weeve-agent.argconf
 
 # appending the required strings to the .service to point systemd to the path of the binary
 # following are the lines appended to weeve-agent.service
-# WorkingDirectory=/home/nithin/weeve-agent
-# ExecStart=/home/nithin/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
+# WorkingDirectory=/home/admin/weeve-agent
+# ExecStart=/home/admin/weeve-agent/weeve-agent-x86_64 $ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME
 
 WORKING_DIRECTORY="WorkingDirectory=$CURRENT_DIRECTORY/weeve-agent"
 
@@ -169,7 +169,7 @@ if RESULT=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
 && sudo mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
 && sudo systemctl enable weeve-agent \
 && sudo systemctl start weeve-agent 2>&1); then
-  log weeve-agent service should be up in around 3 MINUTES, you will be prompted once weeve-agent is connected.
+  log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
   log For good measure please check the access key in .weeve-agent-secret and also if the access key has expired in github
