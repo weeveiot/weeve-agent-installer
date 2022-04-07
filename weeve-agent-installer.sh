@@ -38,8 +38,7 @@ fi
 
 if [ -z "$NODE_NAME" ]; then
 log NODE_NAME is required
-echo -n "Give a node name: "
-read -r NODE_NAME
+read -p "Give a node name: " NODE_NAME
 fi
 
 log All arguments are set
@@ -67,8 +66,7 @@ log Follow the steps :
 log - Create a file named '.weeve-agent-secret'
 log - Paste the Token into the file
 
-echo -n "Give the absolute path to the file: "
-read -r SECRET_FILE
+read -p "Give the absolute path to the file: " SECRET_FILE
 
 # checking for the file containing access key
 if [ -f "$SECRET_FILE" ];then

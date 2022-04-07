@@ -8,28 +8,20 @@ Bash script to download and run the weeve-agent.
 
 # INSTALLING WEEVE-AGENT
 
-### GET THE INSTALLER
-
 ```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh -o weeve-agent-installer.sh
-```
-
-### RUN THE INSTALLER
-
-```bash
-sh weeve-agent-installer.sh
+sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh)
 ```
 
 # UNINSTALLING WEEVE-AGENT
 
 ```bash
-curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh | sh -s NodeName=<name of the node>
+sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh)
 
 ```
 
 # Developers - manually starting the weeve agent
 
-1. Install docker [docker installation for ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+1. Install docker [docker installation](https://docs.docker.com/engine/install/)
 2. Make a folder in the home folder `mkdir weeve-agent`
 3. Copy the agent to the instance
    1. scp -i ~/.ssh/agent-testing.pem <path-to-agent-binary> "ubuntu@<ip>:/home/ubuntu/weeve-agent"
@@ -62,3 +54,9 @@ To delete the IoT thing, call the API mutation deleteNode. This will remove the:
 - things in IoT core
 - node and deployments in DB
 - certs in bucket
+
+## DOCKER INSTALLATION SCRIPT
+
+```bash
+sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/docker-install.sh)
+```
