@@ -44,21 +44,25 @@ fi
 log All arguments are set
 log Name of the node: "$NODE_NAME"
 
-log Checking if a instance of weeve-agent is already running ...
-
 CURRENT_DIRECTORY=$(pwd)
 
 WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
 SERVICE_FILE=/lib/systemd/system/weeve-agent.service
 ARGUMENTS_FILE=/lib/systemd/system/weeve-agent.argconf
 
+# checking for existing agent instance
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
   log Detected some weeve-agent contents!
-  log Proceeding with the un-installation of the existing instance of weeve-agent ...
+  log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
+  read -p "Do you want to proceed? y/n: " RESPONSE
+  if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
+  log Proceeding with the removal of existing weeve-agent contents ...
   cleanup
-  log Continuing with the installation ...
-else
-  log No weeve-agent contents found, proceeding with the installation ...
+  else
+  log exiting ...
+  PROCESS_COMPLETE=true
+  exit 0
+  fi
 fi
 
 log Github Personal Access Token is required to continue!
@@ -73,7 +77,7 @@ if [ -f "$SECRET_FILE" ];then
 log Reading the access key ...
 ACCESS_KEY=$(cat "$SECRET_FILE")
 else
-log File not found!!!
+log .weeve-agent-secret not found in the given path!!!
 exit 0
 fi
 
@@ -125,10 +129,10 @@ fi
 log Downloading the dependencies ...
 
 # downloading the dependencies with personal access key since its stored in private repository
-for DEPENDENCIES in AmazonRootCA1.pem 1d77ae9afd-certificate.pem.crt 1d77ae9afd-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
+for DEPENDENCIES in AmazonRootCA1.pem 4be43aa6f1-certificate.pem.crt 4be43aa6f1-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if RESULT=$(cd ./weeve-agent \
-&& curl -sO https://"$ACCESS_KEY"@raw.githubusercontent.com/nithinsaii/weeve-agent-dependencies--demo/master/$DEPENDENCIES 2>&1); then
+&& curl -sO https://"$ACCESS_KEY"@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$DEPENDENCIES 2>&1); then
   log $DEPENDENCIES downloaded.
 else
   log Error while downloading the dependencies !
@@ -165,7 +169,7 @@ if RESULT=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
 && sudo mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
 && sudo systemctl enable weeve-agent \
 && sudo systemctl start weeve-agent 2>&1); then
-  log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
+  log weeve-agent service should be up in around 3 MINUTES, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
   log For good measure please check the access key in .weeve-agent-secret and also if the access key has expired in github
