@@ -55,6 +55,7 @@ log Follow the steps :
 log 1. Create a file named '.weeve-agent-secret'
 log 2. Paste the Github Token into the file
 log -----------------------------------------------------
+PROCESS_COMPLETE=true
 exit 0
 fi
 
