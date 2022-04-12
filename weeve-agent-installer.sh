@@ -54,7 +54,7 @@ log -----------------------------------------------------
 log Follow the steps :
 log 1. Create a file named .weeve-agent-secret
 log 2. Paste the Github Personal Access Token into the file
-log 3. Run the script again with argument secret=<path to secret file>
+log 3. Run the script again with argument - secret, which takes the path to the secret file
 log -----------------------------------------------------
 CLEANUP=true
 exit 0
