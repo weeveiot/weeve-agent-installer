@@ -22,6 +22,7 @@ cleanup() {
     sudo rm /lib/systemd/system/weeve-agent.service
     sudo rm /lib/systemd/system/weeve-agent.argconf
     rm -r ./weeve-agent
+    log exited! do not mind if any error thrown during the cleanup!
   fi
 }
 
@@ -29,20 +30,45 @@ PROCESS_COMPLETE=false
 
 log Read command line arguments ...
 
-KEY=$(echo "$@" | cut --fields 1 --delimiter='=')
-VALUE=$(echo "$@" | cut --fields 2 --delimiter='=')
+for argument in "$@"
+do
+  key=$(echo $argument | cut --fields 1 --delimiter='=')
+  value=$(echo $argument | cut --fields 2 --delimiter='=')
 
-if [ "$KEY" = NodeName ] ; then
-  NODE_NAME="$VALUE"
-fi
+  case "$key" in
+    "nodename")  NODE_NAME="$value" ;;
+    "secret") SECRET_FILE="$value" ;;
+    *)
+  esac
+done
 
+# validating the arguments
 if [ -z "$NODE_NAME" ]; then
 log NODE_NAME is required
 read -p "Give a node name: " NODE_NAME
 fi
 
+if [ -z "$SECRET_FILE" ]; then
+log -----------------------------------------------------
+log Github Personal Access Token is required to continue!
+log Follow the steps :
+log 1. Create a file named '.weeve-agent-secret'
+log 2. Paste the Github Token into the file
+log -----------------------------------------------------
+exit 0
+fi
+
 log All arguments are set
 log Name of the node: "$NODE_NAME"
+
+# checking for the file containing access key
+if [ -f "$SECRET_FILE" ];then
+log Reading the access key ...
+ACCESS_KEY=$(cat "$SECRET_FILE")
+else
+log .weeve-agent-secret not found in the given path!!!
+exit 0
+fi
 
 CURRENT_DIRECTORY=$(pwd)
 
@@ -65,25 +91,9 @@ if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS
   fi
 fi
 
-log Github Personal Access Token is required to continue!
-log Follow the steps :
-log - Create a file named '.weeve-agent-secret'
-log - Paste the Token into the file
-
-read -p "Give the absolute path to the file: " SECRET_FILE
-
-# checking for the file containing access key
-if [ -f "$SECRET_FILE" ];then
-log Reading the access key ...
-ACCESS_KEY=$(cat "$SECRET_FILE")
-else
-log .weeve-agent-secret not found in the given path!!!
-exit 0
-fi
-
+# checking if docker is running
 log Validating if docker is installed and running ...
 
-# checking if docker is running
 if RESULT=$(systemctl is-active docker 2>&1); then
   log Docker is running.
 else

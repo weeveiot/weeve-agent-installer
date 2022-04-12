@@ -9,7 +9,8 @@ Bash script to download and run the weeve-agent.
 # INSTALLING WEEVE-AGENT
 
 ```bash
-sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh)
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh > weeve-agent-installer.sh
+sh weeve-agent-installer.sh nodename=<name of the node> secret=<path to the secret file>
 ```
 
 # UNINSTALLING WEEVE-AGENT
@@ -54,9 +55,3 @@ To delete the IoT thing, call the API mutation deleteNode. This will remove the:
 - things in IoT core
 - node and deployments in DB
 - certs in bucket
-
-## DOCKER INSTALLATION SCRIPT
-
-```bash
-sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/docker-install.sh)
-```
