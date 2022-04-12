@@ -44,16 +44,18 @@ done
 
 # validating the arguments
 if [ -z "$NODE_NAME" ]; then
-log NODE_NAME is required
+log name of the node is required
 read -p "Give a node name: " NODE_NAME
 fi
 
 if [ -z "$SECRET_FILE" ]; then
+log argument required: secret
 log -----------------------------------------------------
 log Github Personal Access Token is required to continue!
 log Follow the steps :
-log 1. Create a file named '.weeve-agent-secret'
+log 1. Create a file named .weeve-agent-secret
 log 2. Paste the Github Token into the file
+log 3. Run the script again with argument -> secret=<path to the secret file>
 log -----------------------------------------------------
 CLEANUP=true
 exit 0
