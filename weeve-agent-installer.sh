@@ -51,11 +51,10 @@ fi
 if [ -z "$SECRET_FILE" ]; then
 log argument required: secret
 log -----------------------------------------------------
-log Github Personal Access Token is required to continue!
 log Follow the steps :
 log 1. Create a file named .weeve-agent-secret
-log 2. Paste the Github Token into the file
-log 3. Run the script again with argument -> secret=<path to the secret file>
+log 2. Paste the Github Personal Access Token into the file
+log 3. Run the script again with argument secret=<path to secret file>
 log -----------------------------------------------------
 CLEANUP=true
 exit 0
