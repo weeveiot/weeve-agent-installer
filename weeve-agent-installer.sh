@@ -15,7 +15,7 @@ trap cleanup EXIT
 sudo systemctl daemon-reload
 
 cleanup() {
-  if [ "$PROCESS_COMPLETE" = false ]; then
+  if [ "$CLEANUP" = false ]; then
     log cleaning up the contents ...
     sudo systemctl stop weeve-agent
     sudo systemctl daemon-reload
@@ -26,7 +26,7 @@ cleanup() {
   fi
 }
 
-PROCESS_COMPLETE=false
+CLEANUP=false
 
 log Read command line arguments ...
 
@@ -55,7 +55,7 @@ log Follow the steps :
 log 1. Create a file named '.weeve-agent-secret'
 log 2. Paste the Github Token into the file
 log -----------------------------------------------------
-PROCESS_COMPLETE=true
+CLEANUP=true
 exit 0
 fi
 
@@ -87,7 +87,7 @@ if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS
   cleanup
   else
   log exiting ...
-  PROCESS_COMPLETE=true
+  CLEANUP=true
   exit 0
   fi
 fi
@@ -191,11 +191,11 @@ fi
 sleep 5
 
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
-# on successful completion of the script $PROCESS_COMPLETE is set to true to skip the clean-up on exit
+# on successful completion of the script $CLEANUP is set to true to skip the clean-up on exit
 if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
-  PROCESS_COMPLETE=true
+  CLEANUP=true
 else
   log failed to start weeve-agent
   log Returned by the command: "$RESULT"
