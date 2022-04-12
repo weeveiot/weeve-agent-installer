@@ -49,11 +49,12 @@ read -p "Give a node name: " NODE_NAME
 fi
 
 if [ -z "$SECRET_FILE" ]; then
-log argument required: secret
+log ARGUMENT REQUIRED: secret
 log -----------------------------------------------------
+log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
 log 1. Create a file named .weeve-agent-secret
-log 2. Paste the Github Personal Access Token into the file
+log 2. Paste the Github Personal Access Token into the above mentioned file
 log -----------------------------------------------------
 CLEANUP="true"
 exit 0
