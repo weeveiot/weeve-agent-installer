@@ -37,24 +37,24 @@ cleanup() {
     fi
 
     if [ -f "$SERVICE_FILE" ]; then
-    sudo rm $SERVICE_FILE
-    log $SERVICE_FILE removed
+    sudo rm "$SERVICE_FILE"
+    log "$SERVICE_FILE" removed
     else
-    log $SERVICE_FILE doesnt exists
+    log "$SERVICE_FILE" doesnt exists
     fi
 
     if [ -f "$ARGUMENTS_FILE" ]; then
-    sudo rm $ARGUMENTS_FILE
-    log $ARGUMENTS_FILE removed
+    sudo rm "$ARGUMENTS_FILE"
+    log "$ARGUMENTS_FILE" removed
     else
-    log $ARGUMENTS_FILE doesnt exists
+    log "$ARGUMENTS_FILE" doesnt exists
     fi
 
     if [ -d "$WEEVE_AGENT_DIRECTORY" ] ; then
-    rm -r $WEEVE_AGENT_DIRECTORY
-    log $WEEVE_AGENT_DIRECTORY removed
+    rm -r "$WEEVE_AGENT_DIRECTORY"
+    log "$WEEVE_AGENT_DIRECTORY" removed
     else
-    log $WEEVE_AGENT_DIRECTORY doesnt exists
+    log "$WEEVE_AGENT_DIRECTORY" doesnt exists
     fi
 
   fi
@@ -64,8 +64,8 @@ log Read command line arguments ...
 
 for argument in "$@"
 do
-  key=$(echo $argument | cut --fields 1 --delimiter='=')
-  value=$(echo $argument | cut --fields 2 --delimiter='=')
+  key=$(echo "$argument" | cut --fields 1 --delimiter='=')
+  value=$(echo "$argument" | cut --fields 2 --delimiter='=')
 
   case "$key" in
     "nodename")  NODE_NAME="$value" ;;
@@ -90,7 +90,7 @@ fi
 
 if [ -z "$NODE_NAME" ]; then
 log name of the node is required
-read -p "Give a node name: " NODE_NAME
+read -r -p "Give a node name: " NODE_NAME
 fi
 
 log All arguments are set
@@ -109,13 +109,13 @@ fi
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
   log Detected some weeve-agent contents!
   log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
-  read -p "Do you want to proceed? y/n: " RESPONSE
+  read -r -p "Do you want to proceed? y/n: " RESPONSE
   if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
   log Proceeding with the removal of existing weeve-agent contents ...
   cleanup
   else
   log exiting ...
-  CLEANUP=true
+  CLEANUP="false"
   exit 0
   fi
 fi
