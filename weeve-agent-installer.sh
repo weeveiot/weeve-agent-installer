@@ -14,19 +14,51 @@ trap cleanup EXIT
 # if in case the user have deleted the weeve-agent.service and did not reload the systemd daemon
 sudo systemctl daemon-reload
 
+CURRENT_DIRECTORY=$(pwd)
+WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
+
+SERVICE_FILE=/lib/systemd/system/weeve-agent.service
+
+ARGUMENTS_FILE=/lib/systemd/system/weeve-agent.argconf
+
+CLEANUP="true"
+
 cleanup() {
-  if [ "$CLEANUP" = "false" ]; then
+  if [ "$CLEANUP" = "true" ]; then
+
     log cleaning up the contents ...
+
+    if RESULT=$(systemctl is-active weeve-agent 2>&1); then
     sudo systemctl stop weeve-agent
     sudo systemctl daemon-reload
-    sudo rm /lib/systemd/system/weeve-agent.service
-    sudo rm /lib/systemd/system/weeve-agent.argconf
-    rm -r ./weeve-agent
-    log exited! do not mind if any error thrown during the cleanup!
+    log weeve-agent service stopped
+    else
+    log weeve-agent service not running
+    fi
+
+    if [ -f "$SERVICE_FILE" ]; then
+    sudo rm $SERVICE_FILE
+    log $SERVICE_FILE removed
+    else
+    log $SERVICE_FILE doesnt exists
+    fi
+
+    if [ -f "$ARGUMENTS_FILE" ]; then
+    sudo rm $ARGUMENTS_FILE
+    log $ARGUMENTS_FILE removed
+    else
+    log $ARGUMENTS_FILE doesnt exists
+    fi
+
+    if [ -d "$WEEVE_AGENT_DIRECTORY" ] ; then
+    rm -r $WEEVE_AGENT_DIRECTORY
+    log $WEEVE_AGENT_DIRECTORY removed
+    else
+    log $WEEVE_AGENT_DIRECTORY doesnt exists
+    fi
+
   fi
 }
-
-CLEANUP="false"
 
 log Read command line arguments ...
 
@@ -72,12 +104,6 @@ else
 log .weeve-agent-secret not found in the given path!!!
 exit 0
 fi
-
-CURRENT_DIRECTORY=$(pwd)
-
-WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
-SERVICE_FILE=/lib/systemd/system/weeve-agent.service
-ARGUMENTS_FILE=/lib/systemd/system/weeve-agent.argconf
 
 # checking for existing agent instance
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
@@ -197,7 +223,7 @@ sleep 5
 if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
-  CLEANUP="true"
+  CLEANUP="false"
 else
   log failed to start weeve-agent
   log Returned by the command: "$RESULT"
