@@ -4,7 +4,7 @@ LOG_FILE=installer.log
 
 # logger
 log() {
-  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a $LOG_FILE
+  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a "$LOG_FILE"
 }
 
 # function to clean-up the contents on failure at any point
@@ -62,14 +62,14 @@ cleanup() {
 
 log Read command line arguments ...
 
-for argument in "$@"
+for ARGUMENT in "$@"
 do
-  key=$(echo "$argument" | cut --fields 1 --delimiter='=')
-  value=$(echo "$argument" | cut --fields 2 --delimiter='=')
+  KEY=$(echo "$ARGUMENT" | cut --fields 1 --delimiter='=')
+  VALUE=$(echo "$ARGUMENT" | cut --fields 2 --delimiter='=')
 
-  case "$key" in
-    "nodename")  NODE_NAME="$value" ;;
-    "secret") SECRET_FILE="$value" ;;
+  case "$KEY" in
+    "NODE_NAME")  NODE_NAME="$VALUE" ;;
+    "SERVICE_FILE") SECRET_FILE="$VALUE" ;;
     *)
   esac
 done

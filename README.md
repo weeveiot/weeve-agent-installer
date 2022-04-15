@@ -17,7 +17,7 @@ Please make sure:
 
 ```bash
 curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh > weeve-agent-installer.sh
-sh weeve-agent-installer.sh secret=<path to the secret file> nodename=<name of the node>
+sh weeve-agent-installer.sh SECRET_FILE=<path to the secret file> NODE_NAME=<name of the node>
 ```
 
 # UNINSTALLING WEEVE-AGENT
