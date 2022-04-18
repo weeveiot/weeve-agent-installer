@@ -69,14 +69,14 @@ do
 
   case "$KEY" in
     "NODE_NAME")  NODE_NAME="$VALUE" ;;
-    "SERVICE_FILE") SECRET_FILE="$VALUE" ;;
+    "SECRET_FILE") SECRET_FILE="$VALUE" ;;
     *)
   esac
 done
 
 # validating the arguments
 if [ -z "$SECRET_FILE" ]; then
-log ARGUMENT REQUIRED: secret
+log The path to the secret file is required | argument name: SECRET_FILE
 log -----------------------------------------------------------------------
 log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
