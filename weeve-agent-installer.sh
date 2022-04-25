@@ -4,7 +4,7 @@ LOG_FILE=installer.log
 
 # logger
 log() {
-  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a $LOG_FILE
+  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a "$LOG_FILE"
 }
 
 # function to clean-up the contents on failure at any point
@@ -14,63 +14,87 @@ trap cleanup EXIT
 # if in case the user have deleted the weeve-agent.service and did not reload the systemd daemon
 sudo systemctl daemon-reload
 
+CURRENT_DIRECTORY=$(pwd)
+WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
+
+SERVICE_FILE=/lib/systemd/system/weeve-agent.service
+
+ARGUMENTS_FILE=/lib/systemd/system/weeve-agent.argconf
+
+CLEANUP="true"
+
 cleanup() {
-  if [ "$PROCESS_COMPLETE" = false ]; then
+  if [ "$CLEANUP" = "true" ]; then
+
     log cleaning up the contents ...
+
+    if RESULT=$(systemctl is-active weeve-agent 2>&1); then
     sudo systemctl stop weeve-agent
     sudo systemctl daemon-reload
-    sudo rm /lib/systemd/system/weeve-agent.service
-    sudo rm /lib/systemd/system/weeve-agent.argconf
-    rm -r ./weeve-agent
+    log weeve-agent service stopped
+    else
+    log weeve-agent service not running
+    fi
+
+    if [ -f "$SERVICE_FILE" ]; then
+    sudo rm "$SERVICE_FILE"
+    log "$SERVICE_FILE" removed
+    else
+    log "$SERVICE_FILE" doesnt exists
+    fi
+
+    if [ -f "$ARGUMENTS_FILE" ]; then
+    sudo rm "$ARGUMENTS_FILE"
+    log "$ARGUMENTS_FILE" removed
+    else
+    log "$ARGUMENTS_FILE" doesnt exists
+    fi
+
+    if [ -d "$WEEVE_AGENT_DIRECTORY" ] ; then
+    rm -r "$WEEVE_AGENT_DIRECTORY"
+    log "$WEEVE_AGENT_DIRECTORY" removed
+    else
+    log "$WEEVE_AGENT_DIRECTORY" doesnt exists
+    fi
+
   fi
 }
 
-PROCESS_COMPLETE=false
-
 log Read command line arguments ...
 
-KEY=$(echo "$@" | cut --fields 1 --delimiter='=')
-VALUE=$(echo "$@" | cut --fields 2 --delimiter='=')
+for ARGUMENT in "$@"
+do
+  KEY=$(echo "$ARGUMENT" | cut --fields 1 --delimiter='=')
+  VALUE=$(echo "$ARGUMENT" | cut --fields 2 --delimiter='=')
 
-if [ "$KEY" = NodeName ] ; then
-  NODE_NAME="$VALUE"
+  case "$KEY" in
+    "NODE_NAME")  NODE_NAME="$VALUE" ;;
+    "SECRET_FILE") SECRET_FILE="$VALUE" ;;
+    *)
+  esac
+done
+
+# validating the arguments
+if [ -z "$SECRET_FILE" ]; then
+log The path to the secret file is required | argument name: SECRET_FILE
+log -----------------------------------------------------------------------
+log If you already do not have .weeve-agent-secret file with the token
+log Follow the steps :
+log 1. Create a file named .weeve-agent-secret
+log 2. Paste the Github Personal Access Token into the above mentioned file
+log For more info checkout the README 
+log ------------------------------------------------------------------------
+CLEANUP="false"
+exit 0
 fi
 
 if [ -z "$NODE_NAME" ]; then
-log NODE_NAME is required
-read -p "Give a node name: " NODE_NAME
+log name of the node is required
+read -r -p "Give a node name: " NODE_NAME
 fi
 
 log All arguments are set
 log Name of the node: "$NODE_NAME"
-
-CURRENT_DIRECTORY=$(pwd)
-
-WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
-SERVICE_FILE=/lib/systemd/system/weeve-agent.service
-ARGUMENTS_FILE=/lib/systemd/system/weeve-agent.argconf
-
-# checking for existing agent instance
-if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
-  log Detected some weeve-agent contents!
-  log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
-  read -p "Do you want to proceed? y/n: " RESPONSE
-  if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
-  log Proceeding with the removal of existing weeve-agent contents ...
-  cleanup
-  else
-  log exiting ...
-  PROCESS_COMPLETE=true
-  exit 0
-  fi
-fi
-
-log Github Personal Access Token is required to continue!
-log Follow the steps :
-log - Create a file named '.weeve-agent-secret'
-log - Paste the Token into the file
-
-read -p "Give the absolute path to the file: " SECRET_FILE
 
 # checking for the file containing access key
 if [ -f "$SECRET_FILE" ];then
@@ -81,9 +105,24 @@ log .weeve-agent-secret not found in the given path!!!
 exit 0
 fi
 
-log Validating if docker is installed and running ...
+# checking for existing agent instance
+if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
+  log Detected some weeve-agent contents!
+  log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
+  read -r -p "Do you want to proceed? y/n: " RESPONSE
+  if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
+  log Proceeding with the removal of existing weeve-agent contents ...
+  cleanup
+  else
+  log exiting ...
+  CLEANUP="false"
+  exit 0
+  fi
+fi
 
 # checking if docker is running
+log Validating if docker is installed and running ...
+
 if RESULT=$(systemctl is-active docker 2>&1); then
   log Docker is running.
 else
@@ -180,11 +219,11 @@ fi
 sleep 5
 
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
-# on successful completion of the script $PROCESS_COMPLETE is set to true to skip the clean-up on exit
+# on successful completion of the script $CLEANUP is set to true to skip the clean-up on exit
 if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
-  PROCESS_COMPLETE=true
+  CLEANUP="false"
 else
   log failed to start weeve-agent
   log Returned by the command: "$RESULT"
