@@ -12,7 +12,7 @@ log() {
 trap cleanup EXIT
 
 # if in case the user have deleted the weeve-agent.service and did not reload the systemd daemon
-sudo systemctl daemon-reload
+systemctl daemon-reload
 
 CURRENT_DIRECTORY=$(pwd)
 WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
@@ -29,22 +29,22 @@ cleanup() {
     log cleaning up the contents ...
 
     if RESULT=$(systemctl is-active weeve-agent 2>&1); then
-    sudo systemctl stop weeve-agent
-    sudo systemctl daemon-reload
+    systemctl stop weeve-agent
+    systemctl daemon-reload
     log weeve-agent service stopped
     else
     log weeve-agent service not running
     fi
 
     if [ -f "$SERVICE_FILE" ]; then
-    sudo rm "$SERVICE_FILE"
+    rm "$SERVICE_FILE"
     log "$SERVICE_FILE" removed
     else
     log "$SERVICE_FILE" doesnt exists
     fi
 
     if [ -f "$ARGUMENTS_FILE" ]; then
-    sudo rm "$ARGUMENTS_FILE"
+    rm "$ARGUMENTS_FILE"
     log "$ARGUMENTS_FILE" removed
     else
     log "$ARGUMENTS_FILE" doesnt exists
@@ -89,7 +89,7 @@ exit 0
 fi
 
 if [ -z "$NODE_NAME" ]; then
-log name of the node is required
+log Name of the node is required
 read -r -p "Give a node name: " NODE_NAME
 fi
 
@@ -203,10 +203,10 @@ echo "$EXEC_START" >> ./weeve-agent/weeve-agent.service
 log Starting the service ...
 
 # moving .service and .argconf to systemd path and starting the service
-if RESULT=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
-&& sudo mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
-&& sudo systemctl enable weeve-agent \
-&& sudo systemctl start weeve-agent 2>&1); then
+if RESULT=$(mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
+&& mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
+&& systemctl enable weeve-agent \
+&& systemctl start weeve-agent 2>&1); then
   log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
