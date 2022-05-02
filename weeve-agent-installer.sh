@@ -69,14 +69,14 @@ do
 
   case "$KEY" in
     "NODE_NAME")  NODE_NAME="$VALUE" ;;
-    "SECRET_FILE") SECRET_FILE="$VALUE" ;;
+    "TOKEN_FILE") TOKEN_FILE="$VALUE" ;;
     *)
   esac
 done
 
 # validating the arguments
-if [ -z "$SECRET_FILE" ]; then
-log The path to the secret file is required | argument name: SECRET_FILE
+if [ -z "$TOKEN_FILE" ]; then
+log The path to the token file is required | argument name: TOKEN_FILE
 log -----------------------------------------------------------------------
 log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
@@ -97,9 +97,9 @@ log All arguments are set
 log Name of the node: "$NODE_NAME"
 
 # checking for the file containing access key
-if [ -f "$SECRET_FILE" ];then
+if [ -f "$TOKEN_FILE" ];then
 log Reading the access key ...
-ACCESS_KEY=$(cat "$SECRET_FILE")
+ACCESS_KEY=$(cat "$TOKEN_FILE")
 else
 log .weeve-agent-secret not found in the given path!!!
 exit 0
@@ -108,8 +108,7 @@ fi
 # checking for existing agent instance
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
   log Detected some weeve-agent contents!
-  log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
-  read -r -p "Do you want to proceed? y/n: " RESPONSE
+  read -r -p "Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent! Do you want to proceed? y/n: " RESPONSE
   if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
   log Proceeding with the removal of existing weeve-agent contents ...
   cleanup
@@ -219,7 +218,7 @@ fi
 sleep 5
 
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
-# on successful completion of the script $CLEANUP is set to true to skip the clean-up on exit
+# on successful completion of the script $CLEANUP is set to false to skip the clean-up on exit
 if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
