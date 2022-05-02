@@ -20,13 +20,13 @@ curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/wee
 ```
 
 ```bash
-sh weeve-agent-installer.sh TOKEN_FILE=<path to the secret file> NODE_NAME=<name of the node>
+sudo sh weeve-agent-installer.sh token=<path to the secret file> nodename=<name of the node>
 ```
 
 # UNINSTALLING WEEVE-AGENT
 
 ```bash
-sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh)
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh | sudo sh
 
 ```
 

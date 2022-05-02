@@ -68,15 +68,15 @@ do
   VALUE=$(echo "$ARGUMENT" | cut --fields 2 --delimiter='=')
 
   case "$KEY" in
-    "NODE_NAME")  NODE_NAME="$VALUE" ;;
-    "TOKEN_FILE") TOKEN_FILE="$VALUE" ;;
+    "nodename")  NODE_NAME="$VALUE" ;;
+    "token") TOKEN_FILE="$VALUE" ;;
     *)
   esac
 done
 
 # validating the arguments
 if [ -z "$TOKEN_FILE" ]; then
-log The path to the token file is required | argument name: TOKEN_FILE
+log Missing argument: token
 log -----------------------------------------------------------------------
 log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
