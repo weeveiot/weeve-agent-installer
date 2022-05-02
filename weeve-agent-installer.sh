@@ -12,7 +12,7 @@ log() {
 trap cleanup EXIT
 
 # if in case the user have deleted the weeve-agent.service and did not reload the systemd daemon
-sudo systemctl daemon-reload
+systemctl daemon-reload
 
 CURRENT_DIRECTORY=$(pwd)
 WEEVE_AGENT_DIRECTORY="$CURRENT_DIRECTORY"/weeve-agent
@@ -29,22 +29,22 @@ cleanup() {
     log cleaning up the contents ...
 
     if RESULT=$(systemctl is-active weeve-agent 2>&1); then
-    sudo systemctl stop weeve-agent
-    sudo systemctl daemon-reload
+    systemctl stop weeve-agent
+    systemctl daemon-reload
     log weeve-agent service stopped
     else
     log weeve-agent service not running
     fi
 
     if [ -f "$SERVICE_FILE" ]; then
-    sudo rm "$SERVICE_FILE"
+    rm "$SERVICE_FILE"
     log "$SERVICE_FILE" removed
     else
     log "$SERVICE_FILE" doesnt exists
     fi
 
     if [ -f "$ARGUMENTS_FILE" ]; then
-    sudo rm "$ARGUMENTS_FILE"
+    rm "$ARGUMENTS_FILE"
     log "$ARGUMENTS_FILE" removed
     else
     log "$ARGUMENTS_FILE" doesnt exists
@@ -68,15 +68,15 @@ do
   VALUE=$(echo "$ARGUMENT" | cut --fields 2 --delimiter='=')
 
   case "$KEY" in
-    "NODE_NAME")  NODE_NAME="$VALUE" ;;
-    "SECRET_FILE") SECRET_FILE="$VALUE" ;;
+    "nodename")  NODE_NAME="$VALUE" ;;
+    "token") TOKEN_FILE="$VALUE" ;;
     *)
   esac
 done
 
 # validating the arguments
-if [ -z "$SECRET_FILE" ]; then
-log The path to the secret file is required | argument name: SECRET_FILE
+if [ -z "$TOKEN_FILE" ]; then
+log Missing argument: token
 log -----------------------------------------------------------------------
 log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
@@ -89,7 +89,7 @@ exit 0
 fi
 
 if [ -z "$NODE_NAME" ]; then
-log name of the node is required
+log Name of the node is required
 read -r -p "Give a node name: " NODE_NAME
 fi
 
@@ -97,9 +97,9 @@ log All arguments are set
 log Name of the node: "$NODE_NAME"
 
 # checking for the file containing access key
-if [ -f "$SECRET_FILE" ];then
+if [ -f "$TOKEN_FILE" ];then
 log Reading the access key ...
-ACCESS_KEY=$(cat "$SECRET_FILE")
+ACCESS_KEY=$(cat "$TOKEN_FILE")
 else
 log .weeve-agent-secret not found in the given path!!!
 exit 0
@@ -108,8 +108,7 @@ fi
 # checking for existing agent instance
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
   log Detected some weeve-agent contents!
-  log Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent!
-  read -r -p "Do you want to proceed? y/n: " RESPONSE
+  read -r -p "Proceeding with the installation will cause REMOVAL of the existing contents of weeve-agent! Do you want to proceed? y/n: " RESPONSE
   if [ "$RESPONSE" = "y" ] || [ "$RESPONSE" = "yes" ]; then
   log Proceeding with the removal of existing weeve-agent contents ...
   cleanup
@@ -204,10 +203,10 @@ echo "$EXEC_START" >> ./weeve-agent/weeve-agent.service
 log Starting the service ...
 
 # moving .service and .argconf to systemd path and starting the service
-if RESULT=$(sudo mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
-&& sudo mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
-&& sudo systemctl enable weeve-agent \
-&& sudo systemctl start weeve-agent 2>&1); then
+if RESULT=$(mv weeve-agent/weeve-agent.service /lib/systemd/system/ \
+&& mv weeve-agent/weeve-agent.argconf /lib/systemd/system/ \
+&& systemctl enable weeve-agent \
+&& systemctl start weeve-agent 2>&1); then
   log weeve-agent service should be up, you will be prompted once weeve-agent is connected.
 else
   log Error while starting the weeve-agent service!
@@ -219,7 +218,7 @@ fi
 sleep 5
 
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
-# on successful completion of the script $CLEANUP is set to true to skip the clean-up on exit
+# on successful completion of the script $CLEANUP is set to false to skip the clean-up on exit
 if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.

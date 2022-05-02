@@ -8,22 +8,25 @@ Bash script to download and run the weeve-agent.
 
 Please make sure:
 
-1. you have a Github Personal Access Token
-2. there is a file named .weeve-agent-secret in the local
-3. the above mentioned file contains the token (token pasted into the file)
-4. set the argument "secret" with the path to the above mentioned file
+1. You have a Github Personal Access Token
+2. There is a file named .weeve-agent-secret in the local
+3. The above mentioned file contains the token (token pasted into the file)
+4. Set the value of the argument "secret", with the path of the above mentioned file
 
 # INSTALLING WEEVE-AGENT
 
 ```bash
 curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-installer.sh > weeve-agent-installer.sh
-sh weeve-agent-installer.sh SECRET_FILE=<path to the secret file> NODE_NAME=<name of the node>
+```
+
+```bash
+sudo sh weeve-agent-installer.sh token=<path to the secret file> nodename=<name of the node>
 ```
 
 # UNINSTALLING WEEVE-AGENT
 
 ```bash
-sh <(curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh)
+curl -s https://raw.githubusercontent.com/weeveiot/weeve-agent-installer/dev/weeve-agent-uninstaller.sh | sudo sh
 
 ```
 
@@ -57,8 +60,9 @@ It is possible to run multiple instances of the weeve agent in a single host. Ea
 
 # DELETING A NODE
 
-To delete the IoT thing, call the API mutation deleteNode. This will remove the:
+To delete the IoT thing, call the API - deleteNode.
+This will remove the following:
 
-- things in IoT core
-- node and deployments in DB
-- certs in bucket
+- Things from IoT core
+- Node and deployments from DB
+- Certificate from s3 bucket
