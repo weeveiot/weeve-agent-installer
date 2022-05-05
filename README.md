@@ -11,7 +11,7 @@ Please make sure:
 1. You have a Github Personal Access Token
 2. There is a file named .weeve-agent-secret in the local
 3. The above mentioned file contains the token (token pasted into the file)
-4. Set the value of the argument "secret", with the path of the above mentioned file
+4. Set the value of the argument "token", with the path of the above mentioned file
 
 # INSTALLING WEEVE-AGENT
 
