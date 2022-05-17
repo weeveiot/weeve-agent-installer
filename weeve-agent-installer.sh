@@ -157,7 +157,7 @@ if RESULT=$(cd ./weeve-agent \
 && curl -sO https://raw.githubusercontent.com/weeveiot/weeve-agent-binaries/master/"$BINARY_NAME" 2>&1); then
   log Executable downloaded.
   chmod u+x ./weeve-agent/"$BINARY_NAME"
-  log Changes file permission
+  log Changed file permission
 else
   log Error while downloading the executable !
   log Returned by the command: "$RESULT"
@@ -219,7 +219,7 @@ sleep 5
 
 # parsing the weeve-agent log for heartbeat message to verify if the weeve-agent is connected
 # on successful completion of the script $CLEANUP is set to false to skip the clean-up on exit
-if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/Sending update >> Topic/ q' 2>&1);then
+if RESULT=$(tail -f ./weeve-agent/Weeve_Agent.log | sed '/ON connect >> connected >> registered : true/ q' 2>&1);then
   log weeve-agent is connected.
   log start deploying edge-applications through weeve-manager.
   CLEANUP="false"
