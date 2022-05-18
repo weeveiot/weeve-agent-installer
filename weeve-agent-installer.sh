@@ -167,7 +167,7 @@ fi
 log Downloading the dependencies ...
 
 # downloading the dependencies with personal access key since its stored in private repository
-for DEPENDENCIES in AmazonRootCA1.pem 4be43aa6f1-certificate.pem.crt 4be43aa6f1-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
+for DEPENDENCIES in AmazonRootCA1.pem awsdev-certificate.pem.crt awsdev-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if RESULT=$(cd ./weeve-agent \
 && curl -sO https://"$ACCESS_KEY"@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$DEPENDENCIES 2>&1); then
