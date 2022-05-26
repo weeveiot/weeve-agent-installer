@@ -68,15 +68,16 @@ do
   VALUE=$(echo "$ARGUMENT" | cut --fields 2 --delimiter='=')
 
   case "$KEY" in
-    "nodename")  NODE_NAME="$VALUE" ;;
     "token") TOKEN_FILE="$VALUE" ;;
+    "environment") ENV="$VALUE" ;;
+    "nodename")  NODE_NAME="$VALUE" ;;
     *)
   esac
 done
 
 # validating the arguments
 if [ -z "$TOKEN_FILE" ]; then
-log Missing argument: token
+log Missing argument! | argument name: token
 log -----------------------------------------------------------------------
 log If you already do not have .weeve-agent-secret file with the token
 log Follow the steps :
@@ -88,15 +89,7 @@ CLEANUP="false"
 exit 0
 fi
 
-if [ -z "$NODE_NAME" ]; then
-log Name of the node is required
-read -r -p "Give a node name: " NODE_NAME
-fi
-
-log All arguments are set
-log Name of the node: "$NODE_NAME"
-
-# checking for the file containing access key
+# looking for the file containing the github access token
 if [ -f "$TOKEN_FILE" ];then
 log Reading the access key ...
 ACCESS_KEY=$(cat "$TOKEN_FILE")
@@ -104,6 +97,18 @@ else
 log .weeve-agent-secret not found in the given path!!!
 exit 0
 fi
+
+if [ -z "$ENV" ]; then
+read -r -p "Which environment do you want the node to be registered on: " ENV
+fi
+
+if [ -z "$NODE_NAME" ]; then
+read -r -p "Give a node name: " NODE_NAME
+fi
+
+log All arguments are set
+log Environment is set to "$ENV"
+log Name of the node is set to "$NODE_NAME"
 
 # checking for existing agent instance
 if [ -d "$WEEVE_AGENT_DIRECTORY" ] || [ -f "$SERVICE_FILE" ] || [ -f "$ARGUMENTS_FILE" ]; then
@@ -167,7 +172,7 @@ fi
 log Downloading the dependencies ...
 
 # downloading the dependencies with personal access key since its stored in private repository
-for DEPENDENCIES in AmazonRootCA1.pem awsdev-certificate.pem.crt awsdev-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
+for DEPENDENCIES in AmazonRootCA1.pem aws"$ENV"-certificate.pem.crt aws"$ENV"-private.pem.key nodeconfig.json weeve-agent.service weeve-agent.argconf
 do
 if RESULT=$(cd ./weeve-agent \
 && curl -sO https://"$ACCESS_KEY"@raw.githubusercontent.com/weeveiot/weeve-agent-dependencies/master/$DEPENDENCIES 2>&1); then
@@ -183,7 +188,12 @@ log Dependencies downloaded.
 
 # appending the argument for node name to weeve-agent.argconf
 log Adding the node name argument ...
-echo "ARG_NODENAME=--name $NODE_NAME" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_SUB_CLIENT=--subClientId nodes/aws%s\n" "$ENV" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_PUB_CLIENT=--pubClientId manager/aws%s\n" "$ENV" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_ROOT_CERT=--rootcert AmazonRootCA1.pem\n" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_CERT=--cert aws%s-certificate.pem.crt\n" "$ENV" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_KEY=--key aws%s-private.pem.key\n" "$ENV" >> ./weeve-agent/weeve-agent.argconf
+printf "ARG_NODENAME=--name %s" "$NODE_NAME" >> ./weeve-agent/weeve-agent.argconf
 
 # appending the required strings to the .service to point systemd to the path of the binary
 # following are the lines appended to weeve-agent.service
@@ -193,7 +203,7 @@ echo "ARG_NODENAME=--name $NODE_NAME" >> ./weeve-agent/weeve-agent.argconf
 WORKING_DIRECTORY="WorkingDirectory=$CURRENT_DIRECTORY/weeve-agent"
 
 BINARY_PATH="ExecStart=$CURRENT_DIRECTORY/weeve-agent/$BINARY_NAME "
-ARGUMENTS='$ARG_VERBOSE $ARG_BROKER $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_PUBLISH $ARG_HEARTBEAT $ARG_NODENAME'
+ARGUMENTS='$ARG_VERBOSE $ARG_HEARTBEAT $ARG_BROKER $ARG_PUBLISH $ARG_SUB_CLIENT $ARG_PUB_CLIENT $ARG_ROOT_CERT $ARG_CERT $ARG_KEY $ARG_NODENAME'
 EXEC_START="$BINARY_PATH$ARGUMENTS"
 
 log Adding the binary path to service file ...
