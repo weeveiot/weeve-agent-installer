@@ -1,10 +1,8 @@
 #!/bin/sh
 
-LOG_FILE=un-installer.log
-
 # logger
 log() {
-  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@" | tee -a "$LOG_FILE"
+  echo '[' "$(date +"%Y-%m-%d %T")" ']:' INFO "$@"
 }
 
 systemctl daemon-reload
